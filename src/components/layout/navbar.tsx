@@ -24,9 +24,11 @@ export default function Navbar() {
           </h1>
           <NavigationMenu>
             <NavigationMenuList className="flex items-center gap-4">
-              <NavigationMenuItem>
-                <Link href="/dashboard">Dashboard</Link>
-              </NavigationMenuItem>
+              <SignedIn>
+                <NavigationMenuItem>
+                  <Link href="/dashboard">Dashboard</Link>
+                </NavigationMenuItem>
+              </SignedIn>
               <NavigationMenuItem>
                 <ThemeSwitch />
               </NavigationMenuItem>

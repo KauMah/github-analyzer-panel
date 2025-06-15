@@ -1,19 +1,3 @@
-import {
-  SignedOut,
-  SignInButton,
-  SignUpButton,
-  SignedIn,
-  UserButton,
-  SignOutButton,
-} from '@clerk/nextjs';
-
-import { ThemeSwitch } from '@/components/layout/theme-switcher';
-import {
-  NavigationMenu,
-  NavigationMenuList,
-  NavigationMenuItem,
-} from '@/components/ui/navigation-menu';
-
 export default async function Home() {
   return (
     <div className="min-h-screen bg-gradient-to-br from-blue-100 to-green-100 dark:from-blue-950 dark:to-green-950">

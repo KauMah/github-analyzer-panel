@@ -20,6 +20,7 @@ export default async function ChildProcessTest() {
 
     return <div>{commitText ? 'Process worked' : 'Process failed'}</div>;
   } catch (error) {
+    console.error(error);
     return <p>Something went wrong rendering your component </p>;
   }
 }
