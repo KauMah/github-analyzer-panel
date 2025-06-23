@@ -8,6 +8,7 @@ export const env = createEnv({
       .default('development'),
     CLERK_SECRET_KEY: z.string(),
     DATABASE_URL: z.string(),
+    CLERK_WEBHOOK_SIGNING_SECRET: z.string(),
   },
   client: {
     NEXT_PUBLIC_CLERK_PUBLISHABLE_KEY: z.string(),
