@@ -1,3 +1,5 @@
+import posthog from 'posthog-js';
+
 export default function Dashboard() {
   return (
     <div>
