@@ -1,8 +1,7 @@
 import { NextRequest, NextResponse } from 'next/server';
 import { env } from '@/env';
 import { verifyWebhook } from '@clerk/nextjs/webhooks';
-import { prisma } from '@/lib/prisma';
-import { UserCreateParams } from '@/lib/validators/user';
+import { createUser } from '@/dal/usersService';
 
 export async function POST(request: NextRequest) {
   const wh_secret = env.CLERK_WEBHOOK_SIGNING_SECRET;
@@ -20,11 +19,7 @@ export async function POST(request: NextRequest) {
     const eventType = evt.type;
     if (eventType === 'user.created') {
       if (!!id) {
-        await prisma.user.create({
-          data: {
-            clerkId: id,
-          },
-        });
+        await createUser({ clerkId: id });
         return new Response('Webhook received', { status: 200 });
       } else {
         return new Response('Webhook received, id not found', { status: 500 });
