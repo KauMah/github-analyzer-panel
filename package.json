@@ -9,7 +9,8 @@
     "lint": "next lint",
     "check-types": "tsc --noEmit",
     "db:push": "prisma db push",
-    "generate": "prisma generate"
+    "generate": "prisma generate",
+    "prepare": "husky install"
   },
   "dependencies": {
     "@clerk/nextjs": "^6.21.0",
@@ -40,6 +41,8 @@
     "eslint": "^9",
     "eslint-config-next": "15.3.3",
     "eslint-plugin-prettier": "^5.4.1",
+    "husky": "^8.0.0",
+    "lint-staged": "^16.1.2",
     "prettier": "^3.5.3",
     "prettier-plugin-tailwindcss": "^0.6.13",
     "prisma": "^6.9.0",
@@ -51,5 +54,10 @@
   "packageManager": "pnpm@10.11.0",
   "prisma": {
     "schema": "./prisma"
+  },
+  "lint-staged": {
+    "src/**/*.{js,jsx,ts,tsx}": [
+      "eslint --fix"
+    ]
   }
 }

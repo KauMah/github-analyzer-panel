@@ -1,9 +1,9 @@
 export default async function Home() {
   return (
     <div className="min-h-screen bg-gradient-to-br from-blue-100 to-green-100 dark:from-blue-950 dark:to-green-950">
-      <main className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
+      <main className="mx-auto max-w-7xl px-4 py-8 sm:px-6 lg:px-8">
         <div className="text-center">
-          <h2 className="text-3xl font-bold text-gray-900 dark:text-gray-100 mb-4">
+          <h2 className="mb-4 text-3xl font-bold text-gray-900 dark:text-gray-100">
             Welcome to GithubAnalyzer
           </h2>
           <p className="text-lg text-gray-600 dark:text-gray-400">
