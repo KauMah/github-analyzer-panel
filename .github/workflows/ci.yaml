@@ -26,6 +26,10 @@ jobs:
         shell: bash
         run: find . -type f -name ".env.example" -exec sh -c 'cp "$1" "${1%.*}"' _ {} \;
 
+      - name: Generate Prisma Client
+        shell: bash
+        run: pnpm generate
+
       - name: Run typechecker
         run: pnpm check-types
 
