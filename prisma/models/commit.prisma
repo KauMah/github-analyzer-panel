@@ -1,0 +1,11 @@
+model Commit {
+  repo        String
+  username    String
+  hash        String
+  timestamp   DateTime
+  files       String
+  linesAdded  String
+  linesDeleted String
+  @@id([username, hash])
+  @@index([username])
+}
