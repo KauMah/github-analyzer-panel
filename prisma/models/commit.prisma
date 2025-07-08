@@ -3,9 +3,9 @@ model Commit {
   username     String
   hash         String
   timestamp    DateTime
-  files        String
-  linesAdded   String
-  linesDeleted String
+  files        Int
+  linesAdded   Int
+  linesDeleted Int
 
   @@id([username, hash])
   @@index([username])
