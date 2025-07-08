@@ -58,6 +58,9 @@
   "lint-staged": {
     "src/**/*.{js,jsx,ts,tsx}": [
       "eslint --fix"
+    ],
+    "prisma/**/*.prisma": [
+      "prisma format"
     ]
   }
 }
