@@ -9,6 +9,8 @@ export const env = createEnv({
     CLERK_SECRET_KEY: z.string().min(1),
     DATABASE_URL: z.string().url(),
     CLERK_WEBHOOK_SIGNING_SECRET: z.string().min(1),
+    API_SECRET_KEY: z.string().min(1),
+    BACKEND_URL: z.string().url(),
   },
   client: {
     NEXT_PUBLIC_CLERK_PUBLISHABLE_KEY: z.string().min(1),
@@ -24,5 +26,7 @@ export const env = createEnv({
       process.env.NEXT_PUBLIC_CLERK_PUBLISHABLE_KEY,
     NEXT_PUBLIC_POSTHOG_KEY: process.env.NEXT_PUBLIC_POSTHOG_KEY,
     NEXT_PUBLIC_POSTHOG_HOST: process.env.NEXT_PUBLIC_POSTHOG_HOST,
+    API_SECRET_KEY: process.env.API_SECRET_KEY,
+    BACKEND_URL: process.env.BACKEND_URL,
   },
 });

@@ -1,6 +1,6 @@
 export default async function Home() {
   return (
-    <div className="min-h-screen bg-gradient-to-br from-blue-100 to-green-100 dark:from-blue-950 dark:to-green-950">
+    <div className="h-full">
       <main className="mx-auto max-w-7xl px-4 py-8 sm:px-6 lg:px-8">
         <div className="text-center">
           <h2 className="mb-4 text-3xl font-bold text-gray-900 dark:text-gray-100">

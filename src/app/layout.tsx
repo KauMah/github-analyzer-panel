@@ -32,8 +32,10 @@ export default function RootLayout({
           className={`${geistSans.variable} ${geistMono.variable} antialiased`}
         >
           <Providers>
-            <Navbar />
-            {children}
+            <div className="flex min-h-screen flex-col bg-gradient-to-br from-blue-100 to-green-100 dark:from-blue-950 dark:to-green-950">
+              <Navbar />
+              {children}
+            </div>
           </Providers>
         </body>
       </html>

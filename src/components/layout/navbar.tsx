@@ -1,27 +1,29 @@
 import {
+  SignedIn,
   SignedOut,
   SignInButton,
-  SignUpButton,
-  SignedIn,
-  UserButton,
   SignOutButton,
+  SignUpButton,
+  UserButton,
 } from '@clerk/nextjs';
+import Link from 'next/link';
 import {
   NavigationMenu,
   NavigationMenuItem,
   NavigationMenuList,
 } from '../ui/navigation-menu';
 import { ThemeSwitch } from './theme-switcher';
-import Link from 'next/link';
 
 export default function Navbar() {
   return (
     <div className="border-b border-blue-200 bg-gray-200/80 backdrop-blur-sm dark:border-blue-800 dark:bg-gray-900/80">
       <div className="mx-auto max-w-7xl px-4 sm:px-6 lg:px-8">
         <div className="flex h-16 items-center justify-between">
-          <h1 className="bg-gradient-to-r from-blue-600 to-green-600 bg-clip-text text-2xl font-bold text-transparent dark:from-blue-400 dark:to-green-400">
-            GithubAnalyzer
-          </h1>
+          <Link href="/">
+            <h1 className="bg-gradient-to-r from-blue-600 to-green-600 bg-clip-text text-2xl font-bold text-transparent dark:from-blue-400 dark:to-green-400">
+              GithubAnalyzer
+            </h1>
+          </Link>
           <NavigationMenu>
             <NavigationMenuList className="flex items-center gap-4">
               <SignedIn>
