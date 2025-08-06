@@ -1,6 +1,7 @@
 'use server';
 import { commitFetch } from '@/lib/commitApi';
 import { auth, clerkClient, currentUser } from '@clerk/nextjs/server';
+import { revalidatePath } from 'next/cache';
 
 export async function updateCommits() {
   try {
@@ -26,5 +27,7 @@ export async function updateCommits() {
       success: false,
       error: err instanceof Error ? err.message : 'Unknown error occurred',
     };
+  } finally {
+    revalidatePath('/dashboard');
   }
 }
