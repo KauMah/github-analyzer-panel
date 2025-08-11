@@ -55,7 +55,6 @@ export function CommitLineChart({ commits = [] }: CommitLineChartProps) {
       filesChanged: number;
     };
     const daysData: Record<string, DayData> = {};
-
     const currentDate = new Date(dateRange.startDate);
     while (currentDate <= dateRange.endDate) {
       const dateKey = currentDate.toISOString().split('T')[0];
@@ -69,11 +68,9 @@ export function CommitLineChart({ commits = [] }: CommitLineChartProps) {
       };
       currentDate.setDate(currentDate.getDate() + 1);
     }
-
     filteredCommits.forEach((commit) => {
       const date = new Date(commit.timestamp);
       const dateKey = date.toISOString().split('T')[0];
-
       if (daysData[dateKey]) {
         daysData[dateKey].commits += 1;
         daysData[dateKey].linesAdded += commit.linesAdded;
@@ -81,7 +78,6 @@ export function CommitLineChart({ commits = [] }: CommitLineChartProps) {
         daysData[dateKey].filesChanged += commit.files;
       }
     });
-
     return Object.values(daysData).sort(
       (a, b) => a.dateObj.getTime() - b.dateObj.getTime()
     );
@@ -126,7 +122,6 @@ export function CommitLineChart({ commits = [] }: CommitLineChartProps) {
 
   const getBarColor = (baseColor: string, date: string) => {
     if (hoveredDate === date) {
-      // Make the color brighter when hovered
       return baseColor === '#3b82f6'
         ? '#1d4ed8'
         : baseColor === '#10b981'
@@ -223,14 +218,17 @@ export function CommitLineChart({ commits = [] }: CommitLineChartProps) {
                   }
                 }}
               >
-                <CartesianGrid strokeDasharray="3 3" opacity={0.3} />
+                <CartesianGrid
+                  strokeDasharray="20 0"
+                  opacity={0.6}
+                  vertical={false}
+                />
                 <XAxis
                   dataKey="date"
                   tickFormatter={(value) => {
                     try {
                       return format(new Date(value), 'MMM d');
-                    } catch (error) {
-                      console.error(error);
+                    } catch {
                       return value;
                     }
                   }}
@@ -248,7 +246,6 @@ export function CommitLineChart({ commits = [] }: CommitLineChartProps) {
                 <ChartTooltip
                   content={({ active, payload, label }) => {
                     if (!active || !payload || !label) return null;
-
                     try {
                       const formattedLabel = format(
                         new Date(label),
@@ -261,8 +258,7 @@ export function CommitLineChart({ commits = [] }: CommitLineChartProps) {
                           label={formattedLabel}
                         />
                       );
-                    } catch (error) {
-                      console.error(error);
+                    } catch {
                       return (
                         <ChartTooltipContent
                           active={active}
@@ -286,7 +282,6 @@ export function CommitLineChart({ commits = [] }: CommitLineChartProps) {
               </BarChart>
             </ChartContainer>
           </div>
-
           <div onMouseLeave={() => setHoveredDate(null)}>
             <h3 className="mb-4 text-lg font-semibold">
               Lines Added vs Removed
@@ -300,14 +295,17 @@ export function CommitLineChart({ commits = [] }: CommitLineChartProps) {
                   }
                 }}
               >
-                <CartesianGrid strokeDasharray="3 3" opacity={0.3} />
+                <CartesianGrid
+                  strokeDasharray="1 0"
+                  vertical={false}
+                  opacity={0.6}
+                />
                 <XAxis
                   dataKey="date"
                   tickFormatter={(value) => {
                     try {
                       return format(new Date(value), 'MMM d');
-                    } catch (error) {
-                      console.error(error);
+                    } catch {
                       return value;
                     }
                   }}
@@ -325,7 +323,6 @@ export function CommitLineChart({ commits = [] }: CommitLineChartProps) {
                 <ChartTooltip
                   content={({ active, payload, label }) => {
                     if (!active || !payload || !label) return null;
-
                     try {
                       const formattedLabel = format(
                         new Date(label),
@@ -338,8 +335,7 @@ export function CommitLineChart({ commits = [] }: CommitLineChartProps) {
                           label={formattedLabel}
                         />
                       );
-                    } catch (error) {
-                      console.error(error);
+                    } catch {
                       return (
                         <ChartTooltipContent
                           active={active}
@@ -351,7 +347,7 @@ export function CommitLineChart({ commits = [] }: CommitLineChartProps) {
                   }}
                 />
                 <ChartLegend content={<ChartLegendContent />} />
-                <Bar dataKey="linesAdded" radius={[4, 4, 0, 0]}>
+                <Bar dataKey="linesAdded" stackId="lines" radius={[4, 4, 0, 0]}>
                   {chartData.map((entry, index) => (
                     <Cell
                       key={`added-cell-${index}`}
@@ -363,7 +359,11 @@ export function CommitLineChart({ commits = [] }: CommitLineChartProps) {
                     />
                   ))}
                 </Bar>
-                <Bar dataKey="linesDeleted" radius={[4, 4, 0, 0]}>
+                <Bar
+                  dataKey="linesDeleted"
+                  stackId="lines"
+                  radius={[4, 4, 0, 0]}
+                >
                   {chartData.map((entry, index) => (
                     <Cell
                       key={`deleted-cell-${index}`}
@@ -379,8 +379,6 @@ export function CommitLineChart({ commits = [] }: CommitLineChartProps) {
             </ChartContainer>
           </div>
         </div>
-
-        {/* Summary Stats */}
         <div className="mt-6 grid grid-cols-2 gap-4 md:grid-cols-4">
           <div className="text-center">
             <div className="text-2xl font-bold text-blue-600">
