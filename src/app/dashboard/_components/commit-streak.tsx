@@ -2,33 +2,58 @@ import { prisma } from '@/lib/prisma';
 import { currentUser } from '@clerk/nextjs/server';
 import { differenceInCalendarDays, parseISO } from 'date-fns';
 
-function calculateStreaks(dates: Date[]): { current: number; max: number } {
-  if (dates.length === 0) return { current: 0, max: 0 };
+function calculateCurrentStreak(dates: Date[]): number {
+  if (dates.length === 0) return 0;
+
+  const today = new Date();
+  const mostRecentDate = dates[0];
+  const daysFromToday = differenceInCalendarDays(today, mostRecentDate);
+
+  if (daysFromToday > 1) return 0;
+
+  let currentStreak = 1;
+
+  for (let i = 1; i < dates.length; i++) {
+    const currentDate = dates[i];
+    const previousDate = dates[i - 1];
+    const diff = differenceInCalendarDays(previousDate, currentDate);
+
+    if (diff === 1) {
+      currentStreak++;
+    } else {
+      break;
+    }
+  }
+
+  return currentStreak;
+}
+
+function calculateMaxStreak(dates: Date[]): number {
+  if (dates.length === 0) return 0;
+  if (dates.length === 1) return 1;
 
   let maxStreak = 1;
   let currentStreak = 1;
-  const today = new Date();
-  let prevDate = dates[0];
-  let isCurrentStreak =
-    differenceInCalendarDays(today, prevDate) === 0 ||
-    differenceInCalendarDays(today, prevDate) === 1;
 
-  for (let i = 1; i < dates.length; i++) {
-    const diff = differenceInCalendarDays(prevDate, dates[i]);
+  for (let i = dates.length - 1; i > 0; i--) {
+    const currentDate = dates[i];
+    const nextDate = dates[i - 1];
+    const diff = differenceInCalendarDays(nextDate, currentDate);
+
     if (diff === 1) {
       currentStreak++;
+      if (currentStreak > maxStreak) {
+        maxStreak = currentStreak;
+      }
     } else if (diff > 1) {
-      if (isCurrentStreak) isCurrentStreak = false;
+      if (currentStreak > maxStreak) {
+        maxStreak = currentStreak;
+      }
       currentStreak = 1;
     }
-    if (currentStreak > maxStreak) maxStreak = currentStreak;
-    prevDate = dates[i];
   }
 
-  return {
-    current: isCurrentStreak ? currentStreak : 0,
-    max: maxStreak,
-  };
+  return maxStreak;
 }
 
 export async function CommitStreak() {
@@ -49,29 +74,33 @@ export async function CommitStreak() {
     .map((d) => parseISO(d))
     .sort((a, b) => b.getTime() - a.getTime());
 
-  const { current, max } = calculateStreaks(uniqueDays);
+  const current = calculateCurrentStreak(uniqueDays);
+  const max = calculateMaxStreak(uniqueDays);
 
   const dbUser = await prisma.user.findUnique({
-    where: { id: user.id },
-    select: { id: true, maxCommitStreak: true },
+    where: { clerkId: user.id },
+    select: { clerkId: true, maxCommitStreak: true },
   });
 
   if (dbUser && (dbUser.maxCommitStreak ?? 0) < max) {
     await prisma.user.update({
-      where: { id: dbUser.id },
+      where: { clerkId: dbUser.clerkId },
       data: { maxCommitStreak: max },
     });
   }
 
   return (
     <div className="flex flex-col gap-1">
-      <div className="text-lg font-semibold">🔥 Commit Streak</div>
+      <div className="text-lg font-semibold">Commit Streak 🔥</div>
       <div>
         <span className="font-bold">{current}</span> day current streak
       </div>
       <div className="text-muted-foreground text-sm">
         Previous record:{' '}
-        <span className="font-bold">{dbUser?.maxCommitStreak ?? 0}</span> days
+        <span className="font-bold">
+          {Math.max(max, dbUser?.maxCommitStreak ?? 0)}
+        </span>{' '}
+        days
       </div>
     </div>
   );

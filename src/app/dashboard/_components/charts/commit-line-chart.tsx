@@ -34,12 +34,6 @@ export function CommitLineChart({ commits = [] }: CommitLineChartProps) {
     return { startDate, endDate };
   });
 
-  const [visibleMetrics, setVisibleMetrics] = useState({
-    commits: true,
-    linesAdded: true,
-    linesDeleted: true,
-  });
-
   const [hoveredDate, setHoveredDate] = useState<string | null>(null);
 
   const filteredCommits = useMemo(() => {
@@ -116,13 +110,6 @@ export function CommitLineChart({ commits = [] }: CommitLineChartProps) {
         dark: '#f87171',
       },
     },
-  };
-
-  const toggleMetric = (metric: keyof typeof visibleMetrics) => {
-    setVisibleMetrics((prev) => ({
-      ...prev,
-      [metric]: !prev[metric],
-    }));
   };
 
   const handleDateRangeChange = (days: number) => {
@@ -221,32 +208,6 @@ export function CommitLineChart({ commits = [] }: CommitLineChartProps) {
             {format(dateRange.startDate, 'MMM d, yyyy')} -{' '}
             {format(dateRange.endDate, 'MMM d, yyyy')}
           </p>
-          <div className="flex items-center gap-2">
-            <Button
-              variant={visibleMetrics.commits ? 'default' : 'outline'}
-              size="sm"
-              onClick={() => toggleMetric('commits')}
-              className="text-xs"
-            >
-              Commits
-            </Button>
-            <Button
-              variant={visibleMetrics.linesAdded ? 'default' : 'outline'}
-              size="sm"
-              onClick={() => toggleMetric('linesAdded')}
-              className="text-xs"
-            >
-              Lines Added
-            </Button>
-            <Button
-              variant={visibleMetrics.linesDeleted ? 'default' : 'outline'}
-              size="sm"
-              onClick={() => toggleMetric('linesDeleted')}
-              className="text-xs"
-            >
-              Lines Deleted
-            </Button>
-          </div>
         </div>
       </CardHeader>
       <CardContent>
