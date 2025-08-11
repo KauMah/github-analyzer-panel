@@ -201,17 +201,6 @@ export function CommitLineChart({ commits = [] }: CommitLineChartProps) {
             >
               1 year
             </Button>
-            <Button
-              variant="outline"
-              size="sm"
-              onClick={() => {
-                const endDate = endOfDay(new Date());
-                const startDate = startOfDay(new Date(0));
-                setDateRange({ startDate, endDate });
-              }}
-            >
-              All time
-            </Button>
           </div>
         </div>
         <div className="flex items-center justify-between">
