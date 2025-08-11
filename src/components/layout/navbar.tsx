@@ -37,10 +37,10 @@ export default function Navbar() {
               <NavigationMenuItem>
                 <SignedOut>
                   <div className="flex items-center gap-2">
-                    <SignInButton>
+                    <SignInButton forceRedirectUrl={'/dashboard'}>
                       <div className="cursor-pointer">Sign In</div>
                     </SignInButton>
-                    <SignUpButton>
+                    <SignUpButton forceRedirectUrl={'/dashboard'}>
                       <div className="cursor-pointer">Sign Up</div>
                     </SignUpButton>
                   </div>
