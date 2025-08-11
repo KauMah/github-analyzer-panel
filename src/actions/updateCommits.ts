@@ -2,8 +2,10 @@
 import { commitFetch } from '@/lib/commitApi';
 import { auth, clerkClient, currentUser } from '@clerk/nextjs/server';
 import { revalidatePath } from 'next/cache';
+import { ActionResult } from './types';
+import { unwrap } from '@/lib/utils';
 
-export async function updateCommits() {
+export async function updateCommits(): Promise<ActionResult<number>> {
   try {
     const { userId } = await auth();
     const user = await currentUser();
@@ -18,10 +20,12 @@ export async function updateCommits() {
     if (!username || !token) {
       throw new Error('Username or token not available');
     }
-    return await commitFetch<number>('/', {
-      method: 'POST',
-      body: JSON.stringify({ token, username }),
-    });
+    return unwrap(
+      await commitFetch<ActionResult<number>>('/', {
+        method: 'POST',
+        body: JSON.stringify({ token, username }),
+      })
+    );
   } catch (err) {
     return {
       success: false,
