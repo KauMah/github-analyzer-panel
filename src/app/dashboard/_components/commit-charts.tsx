@@ -4,10 +4,6 @@ import { CommitLineChart } from './charts/commit-line-chart';
 
 export default async function CommitCharts() {
   const user = await currentUser();
-  const delay = (ms: number) => {
-    return new Promise((resolve) => setTimeout(resolve, ms));
-  };
-  await delay(3000);
 
   const commits = await prisma.commit.findMany({
     where: { username: user?.username ?? '' },

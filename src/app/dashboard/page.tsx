@@ -5,6 +5,7 @@ import { EmptyStateCard } from './_components/empty-state-card';
 import { Suspense } from 'react';
 import { CommitStreak } from './_components/commit-streak';
 import { Card, CardContent, CardHeader } from '@/components/ui/card';
+import { CommitStreakEmptyState } from './_components/commit-streak-empty-state';
 
 export default async function Dashboard() {
   const user = await currentUser();
@@ -16,7 +17,9 @@ export default async function Dashboard() {
           {`${user?.username}'s Activity`}
         </CardHeader>
         <CardContent className="flex justify-between">
-          <CommitStreak />
+          <Suspense fallback={<CommitStreakEmptyState />}>
+            <CommitStreak />
+          </Suspense>
           <UpdateCommitButton />
         </CardContent>
       </Card>
