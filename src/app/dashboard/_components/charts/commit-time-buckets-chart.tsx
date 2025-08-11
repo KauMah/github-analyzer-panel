@@ -23,7 +23,6 @@ export default function CommitTimeHistogram({
   commits = [],
 }: CommitTimeHistogramProps) {
   const chartData = useMemo(() => {
-    // Define 6 time buckets (4 hours each)
     const timeBuckets = [
       { label: 'Early Morning', range: '12:00 AM - 3:59 AM', start: 0, end: 4 },
       { label: 'Dawn', range: '4:00 AM - 7:59 AM', start: 4, end: 8 },
@@ -33,20 +32,15 @@ export default function CommitTimeHistogram({
       { label: 'Night', range: '8:00 PM - 11:59 PM', start: 20, end: 24 },
     ];
 
-    // Initialize bucket counts
     const bucketCounts = timeBuckets.map((bucket) => ({
       ...bucket,
       commits: 0,
       percentage: 0,
     }));
-
-    // Count commits in each time bucket
     commits.forEach((commit) => {
-      // Convert UTC timestamp to local time
       const localTime = new Date(commit.timestamp);
       const hour = localTime.getHours();
 
-      // Find which bucket this hour belongs to
       const bucketIndex = bucketCounts.findIndex(
         (bucket) => hour >= bucket.start && hour < bucket.end
       );
@@ -56,7 +50,6 @@ export default function CommitTimeHistogram({
       }
     });
 
-    // Calculate percentages
     const totalCommits = commits.length;
     bucketCounts.forEach((bucket) => {
       bucket.percentage =
@@ -75,7 +68,6 @@ export default function CommitTimeHistogram({
     },
   };
 
-  // Get the most active time period
   const mostActiveTime = useMemo(() => {
     return chartData.reduce(
       (max, current) => (current.commits > max.commits ? current : max),
@@ -83,7 +75,6 @@ export default function CommitTimeHistogram({
     );
   }, [chartData]);
 
-  // Get user's timezone
   const userTimezone = Intl.DateTimeFormat().resolvedOptions().timeZone;
 
   if (!commits.length) {

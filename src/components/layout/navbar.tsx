@@ -16,7 +16,7 @@ import { ThemeSwitch } from './theme-switcher';
 
 export default function Navbar() {
   return (
-    <div className="border-b border-blue-200 bg-cyan-700/40 backdrop-blur-sm dark:border-blue-800 dark:bg-gray-900/80">
+    <div className="border-b border-blue-200 bg-gray-100/40 backdrop-blur-sm dark:border-blue-800 dark:bg-gray-900/80">
       <div className="mx-auto max-w-7xl px-4 sm:px-6 lg:px-8">
         <div className="flex h-16 items-center justify-between">
           <Link href="/">

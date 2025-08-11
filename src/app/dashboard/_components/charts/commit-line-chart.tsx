@@ -6,7 +6,6 @@ import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import {
   ChartContainer,
   ChartTooltip,
-  ChartTooltipContent,
   ChartLegend,
   ChartLegendContent,
 } from '@/components/ui/chart';
@@ -252,19 +251,45 @@ export function CommitLineChart({ commits = [] }: CommitLineChartProps) {
                         'MMM d, yyyy'
                       );
                       return (
-                        <ChartTooltipContent
-                          active={active}
-                          payload={payload}
-                          label={formattedLabel}
-                        />
+                        <div className="rounded-lg border border-gray-200 bg-white p-3 shadow-lg dark:border-gray-700 dark:bg-gray-900">
+                          <p className="mb-2 font-semibold text-gray-900 dark:text-gray-100">
+                            {formattedLabel}
+                          </p>
+                          {payload.map((item, index) => (
+                            <div
+                              key={index}
+                              className="mb-1 flex items-center justify-between"
+                            >
+                              <span className="text-sm text-gray-600 dark:text-gray-400">
+                                {item.name || item.dataKey}
+                              </span>
+                              <span className="ml-4 font-medium text-gray-900 dark:text-gray-100">
+                                {item.value?.toLocaleString()}
+                              </span>
+                            </div>
+                          ))}
+                        </div>
                       );
                     } catch {
                       return (
-                        <ChartTooltipContent
-                          active={active}
-                          payload={payload}
-                          label={label}
-                        />
+                        <div className="rounded-lg border border-gray-200 bg-white p-3 shadow-lg dark:border-gray-700 dark:bg-gray-900">
+                          <p className="mb-2 font-semibold text-gray-900 dark:text-gray-100">
+                            {label}
+                          </p>
+                          {payload.map((item, index) => (
+                            <div
+                              key={index}
+                              className="mb-1 flex items-center justify-between"
+                            >
+                              <span className="text-sm text-gray-600 dark:text-gray-400">
+                                {item.name || item.dataKey}
+                              </span>
+                              <span className="ml-4 font-medium text-gray-900 dark:text-gray-100">
+                                {item.value?.toLocaleString()}
+                              </span>
+                            </div>
+                          ))}
+                        </div>
                       );
                     }
                   }}
@@ -329,19 +354,45 @@ export function CommitLineChart({ commits = [] }: CommitLineChartProps) {
                         'MMM d, yyyy'
                       );
                       return (
-                        <ChartTooltipContent
-                          active={active}
-                          payload={payload}
-                          label={formattedLabel}
-                        />
+                        <div className="rounded-lg border border-gray-200 bg-white p-3 shadow-lg dark:border-gray-700 dark:bg-gray-900">
+                          <p className="mb-2 font-semibold text-gray-900 dark:text-gray-100">
+                            {formattedLabel}
+                          </p>
+                          {payload.map((item, index) => (
+                            <div
+                              key={index}
+                              className="mb-1 flex items-center justify-between"
+                            >
+                              <span className="text-sm text-gray-600 dark:text-gray-400">
+                                {item.name || item.dataKey}
+                              </span>
+                              <span className="ml-4 font-medium text-gray-900 dark:text-gray-100">
+                                {item.value?.toLocaleString()}
+                              </span>
+                            </div>
+                          ))}
+                        </div>
                       );
                     } catch {
                       return (
-                        <ChartTooltipContent
-                          active={active}
-                          payload={payload}
-                          label={label}
-                        />
+                        <div className="rounded-lg border border-gray-200 bg-white p-3 shadow-lg dark:border-gray-700 dark:bg-gray-900">
+                          <p className="mb-2 font-semibold text-gray-900 dark:text-gray-100">
+                            {label}
+                          </p>
+                          {payload.map((item, index) => (
+                            <div
+                              key={index}
+                              className="mb-1 flex items-center justify-between"
+                            >
+                              <span className="text-sm text-gray-600 dark:text-gray-400">
+                                {item.name || item.dataKey}
+                              </span>
+                              <span className="ml-4 font-medium text-gray-900 dark:text-gray-100">
+                                {item.value?.toLocaleString()}
+                              </span>
+                            </div>
+                          ))}
+                        </div>
                       );
                     }
                   }}
