@@ -34,8 +34,6 @@ export function CommitLineChart({ commits = [] }: CommitLineChartProps) {
     return { startDate, endDate };
   });
 
-  const [hoveredDate, setHoveredDate] = useState<string | null>(null);
-
   const filteredCommits = useMemo(() => {
     return commits.filter((commit) => {
       const commitDate = new Date(commit.timestamp);
@@ -47,7 +45,8 @@ export function CommitLineChart({ commits = [] }: CommitLineChartProps) {
 
   const chartData = useMemo(() => {
     type DayData = {
-      date: Date;
+      date: string;
+      dateObj: Date;
       commits: number;
       linesAdded: number;
       linesDeleted: number;
@@ -59,7 +58,8 @@ export function CommitLineChart({ commits = [] }: CommitLineChartProps) {
     while (currentDate <= dateRange.endDate) {
       const dateKey = currentDate.toISOString().split('T')[0];
       daysData[dateKey] = {
-        date: new Date(currentDate),
+        date: dateKey,
+        dateObj: new Date(currentDate),
         commits: 0,
         linesAdded: 0,
         linesDeleted: 0,
@@ -81,34 +81,25 @@ export function CommitLineChart({ commits = [] }: CommitLineChartProps) {
     });
 
     return Object.values(daysData).sort(
-      (a, b) => new Date(a.date).getTime() - new Date(b.date).getTime()
+      (a, b) => a.dateObj.getTime() - b.dateObj.getTime()
     );
   }, [filteredCommits, dateRange]);
 
   const chartConfig = {
     commits: {
       label: 'Commits',
-      theme: {
-        light: '#3b82f6',
-        dark: '#60a5fa',
-      },
+      color: '#3b82f6',
     },
   };
 
   const linesChartConfig = {
     linesAdded: {
       label: 'Lines Added',
-      theme: {
-        light: '#10b981',
-        dark: '#34d399',
-      },
+      color: '#10b981',
     },
     linesDeleted: {
       label: 'Lines Deleted',
-      theme: {
-        light: '#ef4444',
-        dark: '#f87171',
-      },
+      color: '#ef4444',
     },
   };
 
@@ -147,7 +138,7 @@ export function CommitLineChart({ commits = [] }: CommitLineChartProps) {
       <CardHeader>
         <div className="flex items-center justify-between">
           <CardTitle>Commits per Calendar Day</CardTitle>
-          <div className="flex items-center gap-2">
+          <div className="flex flex-wrap items-center gap-2">
             <Button
               variant={isCurrentRange(7) ? 'default' : 'outline'}
               size="sm"
@@ -216,67 +207,62 @@ export function CommitLineChart({ commits = [] }: CommitLineChartProps) {
           <div>
             <h3 className="mb-4 text-lg font-semibold">Commits & Activity</h3>
             <ChartContainer config={chartConfig} className="h-[300px]">
-              <BarChart
-                data={chartData}
-                onMouseMove={(data) => {
-                  if (data && data.activeLabel) {
-                    setHoveredDate(data.activeLabel);
-                  }
-                }}
-                onMouseLeave={() => setHoveredDate(null)}
-              >
-                <CartesianGrid
-                  strokeDasharray="3 3"
-                  opacity={0.3}
-                  className="stroke-border"
-                />
+              <BarChart data={chartData}>
+                <CartesianGrid strokeDasharray="3 3" opacity={0.3} />
                 <XAxis
                   dataKey="date"
-                  tickFormatter={(value) => format(new Date(value), 'MMM d')}
+                  tickFormatter={(value) => {
+                    try {
+                      return format(new Date(value), 'MMM d');
+                    } catch (error) {
+                      console.error(error);
+                      return value;
+                    }
+                  }}
                   tick={{ fontSize: 12 }}
-                  axisLine={{ stroke: 'hsl(var(--border))' }}
-                  tickLine={{ stroke: 'hsl(var(--border))' }}
                 />
                 <YAxis
                   tick={{ fontSize: 12 }}
-                  axisLine={{ stroke: 'hsl(var(--border))' }}
-                  tickLine={{ stroke: 'hsl(var(--border))' }}
                   label={{
                     value: 'Number of Commits',
                     angle: -90,
                     position: 'insideLeft',
-                    style: {
-                      textAnchor: 'middle',
-                      fontSize: 14,
-                      fontWeight: 500,
-                    },
+                    style: { textAnchor: 'middle' },
                   }}
                 />
                 <ChartTooltip
                   content={({ active, payload, label }) => {
-                    return (
-                      <ChartTooltipContent
-                        active={active}
-                        payload={payload}
-                        labelFormatter={(value) =>
-                          !!label
-                            ? format(new Date(label), 'MMM d, yyyy')
-                            : value
-                        }
-                      />
-                    );
+                    if (!active || !payload || !label) return null;
+
+                    try {
+                      const formattedLabel = format(
+                        new Date(label),
+                        'MMM d, yyyy'
+                      );
+                      return (
+                        <ChartTooltipContent
+                          active={active}
+                          payload={payload}
+                          label={formattedLabel}
+                        />
+                      );
+                    } catch (error) {
+                      console.error(error);
+                      return (
+                        <ChartTooltipContent
+                          active={active}
+                          payload={payload}
+                          label={label}
+                        />
+                      );
+                    }
                   }}
                 />
-                <ChartLegend
-                  content={({ payload }) => (
-                    <ChartLegendContent payload={payload} />
-                  )}
-                />
+                <ChartLegend content={<ChartLegendContent />} />
                 <Bar
                   dataKey="commits"
-                  fill="var(--color-commits)"
+                  fill={chartConfig.commits.color}
                   radius={[4, 4, 0, 0]}
-                  opacity={hoveredDate ? 0.3 : 1}
                 />
               </BarChart>
             </ChartContainer>
@@ -288,85 +274,80 @@ export function CommitLineChart({ commits = [] }: CommitLineChartProps) {
               Lines Added vs Removed
             </h3>
             <ChartContainer config={linesChartConfig} className="h-[300px]">
-              <BarChart
-                data={chartData}
-                onMouseMove={(data) => {
-                  if (data && data.activeLabel) {
-                    setHoveredDate(data.activeLabel);
-                  }
-                }}
-                onMouseLeave={() => setHoveredDate(null)}
-              >
-                <CartesianGrid
-                  strokeDasharray="3 3"
-                  opacity={0.3}
-                  className="stroke-border"
-                />
+              <BarChart data={chartData}>
+                <CartesianGrid strokeDasharray="3 3" opacity={0.3} />
                 <XAxis
                   dataKey="date"
-                  tickFormatter={(value) => format(new Date(value), 'MMM d')}
+                  tickFormatter={(value) => {
+                    try {
+                      return format(new Date(value), 'MMM d');
+                    } catch (error) {
+                      console.error(error);
+                      return value;
+                    }
+                  }}
                   tick={{ fontSize: 12 }}
-                  axisLine={{ stroke: 'hsl(var(--border))' }}
-                  tickLine={{ stroke: 'hsl(var(--border))' }}
                 />
                 <YAxis
                   tick={{ fontSize: 12 }}
-                  axisLine={{ stroke: 'hsl(var(--border))' }}
-                  tickLine={{ stroke: 'hsl(var(--border))' }}
                   label={{
                     value: 'Lines of Code',
                     angle: -90,
                     position: 'insideLeft',
-                    style: {
-                      textAnchor: 'middle',
-                      fontSize: 14,
-                      fontWeight: 500,
-                    },
+                    style: { textAnchor: 'middle' },
                   }}
                 />
                 <ChartTooltip
                   content={({ active, payload, label }) => {
-                    return (
-                      <ChartTooltipContent
-                        active={active}
-                        payload={payload}
-                        labelFormatter={(value) =>
-                          !!label
-                            ? format(new Date(label), 'MMM d, yyyy')
-                            : value
-                        }
-                      />
-                    );
+                    if (!active || !payload || !label) return null;
+
+                    try {
+                      const formattedLabel = format(
+                        new Date(label),
+                        'MMM d, yyyy'
+                      );
+                      return (
+                        <ChartTooltipContent
+                          active={active}
+                          payload={payload}
+                          label={formattedLabel}
+                        />
+                      );
+                    } catch (error) {
+                      console.error(error);
+                      return (
+                        <ChartTooltipContent
+                          active={active}
+                          payload={payload}
+                          label={label}
+                        />
+                      );
+                    }
                   }}
                 />
-                <ChartLegend
-                  content={({ payload }) => (
-                    <ChartLegendContent payload={payload} />
-                  )}
-                />
+                <ChartLegend content={<ChartLegendContent />} />
                 <Bar
                   dataKey="linesAdded"
-                  fill="var(--color-linesAdded)"
+                  fill={linesChartConfig.linesAdded.color}
                   radius={[4, 4, 0, 0]}
-                  opacity={hoveredDate ? 0.3 : 1}
                 />
                 <Bar
                   dataKey="linesDeleted"
-                  fill="var(--color-linesDeleted)"
+                  fill={linesChartConfig.linesDeleted.color}
                   radius={[4, 4, 0, 0]}
-                  opacity={hoveredDate ? 0.3 : 1}
                 />
               </BarChart>
             </ChartContainer>
           </div>
         </div>
 
-        <div className="mt-6 grid grid-cols-2 gap-4">
+        {/* Summary Stats */}
+        <div className="mt-6 grid grid-cols-2 gap-4 md:grid-cols-4">
           <div className="text-center">
             <div className="text-2xl font-bold text-blue-600">
               {filteredCommits.length.toLocaleString()}
             </div>
-            <p className="text-muted-foreground text-xs">Commits in Range</p>
+            <p className="text-muted-foreground text-xs">Commits</p>
           </div>
           <div className="text-center">
             <div className="text-2xl font-bold text-green-600">
@@ -374,9 +355,23 @@ export function CommitLineChart({ commits = [] }: CommitLineChartProps) {
                 .reduce((sum, commit) => sum + commit.linesAdded, 0)
                 .toLocaleString()}
             </div>
-            <p className="text-muted-foreground text-xs">
-              Lines Added in Range
-            </p>
+            <p className="text-muted-foreground text-xs">Lines Added</p>
+          </div>
+          <div className="text-center">
+            <div className="text-2xl font-bold text-red-600">
+              {filteredCommits
+                .reduce((sum, commit) => sum + commit.linesDeleted, 0)
+                .toLocaleString()}
+            </div>
+            <p className="text-muted-foreground text-xs">Lines Deleted</p>
+          </div>
+          <div className="text-center">
+            <div className="text-2xl font-bold text-purple-600">
+              {filteredCommits
+                .reduce((sum, commit) => sum + commit.files, 0)
+                .toLocaleString()}
+            </div>
+            <p className="text-muted-foreground text-xs">Files Changed</p>
           </div>
         </div>
       </CardContent>

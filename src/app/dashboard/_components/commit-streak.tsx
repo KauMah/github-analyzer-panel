@@ -1,6 +1,6 @@
 import { prisma } from '@/lib/prisma';
 import { currentUser } from '@clerk/nextjs/server';
-import { differenceInCalendarDays, parseISO } from 'date-fns';
+import { differenceInCalendarDays, parseISO, isWeekend } from 'date-fns';
 
 function calculateCurrentStreak(dates: Date[]): number {
   if (dates.length === 0) return 0;
@@ -9,6 +9,7 @@ function calculateCurrentStreak(dates: Date[]): number {
   const mostRecentDate = dates[0];
   const daysFromToday = differenceInCalendarDays(today, mostRecentDate);
 
+  // If most recent commit is more than 1 weekday away, no current streak
   if (daysFromToday > 1) return 0;
 
   let currentStreak = 1;
@@ -19,9 +20,32 @@ function calculateCurrentStreak(dates: Date[]): number {
     const diff = differenceInCalendarDays(previousDate, currentDate);
 
     if (diff === 1) {
+      // Consecutive days
       currentStreak++;
+    } else if (diff > 1) {
+      // Check if the gap is only weekends
+      let isOnlyWeekends = true;
+      const checkDate = new Date(previousDate);
+      checkDate.setDate(checkDate.getDate() - 1);
+
+      while (differenceInCalendarDays(previousDate, checkDate) > 0) {
+        if (!isWeekend(checkDate)) {
+          isOnlyWeekends = false;
+          break;
+        }
+        checkDate.setDate(checkDate.getDate() - 1);
+      }
+
+      if (isOnlyWeekends) {
+        // Only weekends in the gap, streak continues
+        currentStreak++;
+      } else {
+        // Weekday gap found, streak ends
+        break;
+      }
     } else {
-      break;
+      // Same day, continue
+      continue;
     }
   }
 
@@ -41,15 +65,41 @@ function calculateMaxStreak(dates: Date[]): number {
     const diff = differenceInCalendarDays(nextDate, currentDate);
 
     if (diff === 1) {
+      // Consecutive days
       currentStreak++;
       if (currentStreak > maxStreak) {
         maxStreak = currentStreak;
       }
     } else if (diff > 1) {
-      if (currentStreak > maxStreak) {
-        maxStreak = currentStreak;
+      // Check if the gap is only weekends
+      let isOnlyWeekends = true;
+      const checkDate = new Date(currentDate);
+      checkDate.setDate(checkDate.getDate() + 1);
+
+      while (differenceInCalendarDays(nextDate, checkDate) > 0) {
+        if (!isWeekend(checkDate)) {
+          isOnlyWeekends = false;
+          break;
+        }
+        checkDate.setDate(checkDate.getDate() + 1);
       }
-      currentStreak = 1;
+
+      if (isOnlyWeekends) {
+        // Only weekends in the gap, streak continues
+        currentStreak++;
+        if (currentStreak > maxStreak) {
+          maxStreak = currentStreak;
+        }
+      } else {
+        // Weekday gap found, streak ends
+        if (currentStreak > maxStreak) {
+          maxStreak = currentStreak;
+        }
+        currentStreak = 1;
+      }
+    } else {
+      // Same day, continue
+      continue;
     }
   }
 
