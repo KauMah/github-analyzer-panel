@@ -29,7 +29,10 @@ export default function UpdateCommitButton() {
       }
     >
       {isPending ? (
-        <Spinner size="small" className="dark:text-black" />
+        <>
+          <Spinner size="small" className="dark:text-black" />
+          <p>Might be a while...</p>
+        </>
       ) : (
         'Update Your Commits'
       )}

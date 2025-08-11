@@ -75,6 +75,184 @@ export default function CommitTimeHistogram({
     );
   }, [chartData]);
 
+  const developerType = useMemo(() => {
+    if (commits.length === 0) return null;
+
+    const totalCommits = commits.length;
+    const earlyMorning = chartData[0].commits;
+    const dawn = chartData[1].commits;
+    const morning = chartData[2].commits;
+    const afternoon = chartData[3].commits;
+    const evening = chartData[4].commits;
+    const night = chartData[5].commits;
+
+    const earlyTotal = earlyMorning + dawn;
+    const workHours = morning + afternoon;
+    const nightTotal = night + earlyMorning;
+    const allBuckets = [earlyMorning, dawn, morning, afternoon, evening, night];
+
+    const maxCommits = Math.max(...allBuckets);
+    const avgCommits = totalCommits / 6;
+    const variance =
+      allBuckets.reduce((sum, val) => sum + Math.pow(val - avgCommits, 2), 0) /
+      6;
+    const stdDev = Math.sqrt(variance);
+
+    const profiles = [
+      {
+        type: 'The Early Riser',
+        description:
+          'You prefer to code in the early hours, likely before work or right after waking up. This suggests discipline or possibly working across timezones.',
+        icon: '🌅',
+        color: 'text-orange-600',
+        score: Math.min(
+          100,
+          Math.max(
+            0,
+            (earlyTotal / totalCommits) * 100 +
+              (earlyTotal > workHours ? 20 : 0) +
+              (earlyTotal > nightTotal ? 20 : 0)
+          )
+        ),
+      },
+      {
+        type: 'The 9-to-5er',
+        description:
+          'Your coding activity peaks during traditional work hours, suggesting office-based or team-driven development work.',
+        icon: '💼',
+        color: 'text-blue-600',
+        score: Math.min(
+          100,
+          Math.max(
+            0,
+            (workHours / totalCommits) * 100 +
+              (workHours > earlyTotal ? 20 : 0) +
+              (workHours > nightTotal ? 20 : 0)
+          )
+        ),
+      },
+      {
+        type: 'The Night Owl',
+        description:
+          'You thrive in late-night coding sessions, preferring uninterrupted time for deep work. Common among indie developers and students.',
+        icon: '🦉',
+        color: 'text-purple-600',
+        score: Math.min(
+          100,
+          Math.max(
+            0,
+            (nightTotal / totalCommits) * 100 +
+              (nightTotal > earlyTotal ? 20 : 0) +
+              (nightTotal > workHours ? 20 : 0)
+          )
+        ),
+      },
+      {
+        type: 'The Burst Coder',
+        description:
+          'You prefer short, intense, focused coding sessions with sharp peaks in activity followed by quiet periods.',
+        icon: '⚡',
+        color: 'text-yellow-600',
+        score: Math.min(
+          100,
+          Math.max(
+            0,
+            (maxCommits / avgCommits) * 20 + (stdDev / avgCommits) * 30
+          )
+        ),
+      },
+      {
+        type: 'The Marathoner',
+        description:
+          'You maintain consistent coding activity throughout the day, suggesting flexible hours or always-on availability.',
+        icon: '🏃',
+        color: 'text-green-600',
+        score: Math.min(
+          100,
+          Math.max(
+            0,
+            (1 - stdDev / avgCommits) * 50 +
+              (maxCommits < avgCommits * 2 ? 30 : 0)
+          )
+        ),
+      },
+      {
+        type: 'The Split-Shift Hacker',
+        description:
+          'You have two distinct coding peaks - one in the morning and one late at night, possibly indicating day-job + night project work.',
+        icon: '🔄',
+        color: 'text-indigo-600',
+        score: Math.min(
+          100,
+          Math.max(
+            0,
+            (morning > avgCommits * 1.5 ? 30 : 0) +
+              (night > avgCommits * 1.5 ? 30 : 0) +
+              (afternoon < avgCommits * 0.8 ? 20 : 0) +
+              (Math.abs(morning - night) < avgCommits * 0.5 ? 20 : 0)
+          )
+        ),
+      },
+      {
+        type: 'The Deadline Sprinter',
+        description:
+          'You often push code late at night, suggesting last-minute deliveries or hackathon-style crunch periods.',
+        icon: '🏁',
+        color: 'text-red-600',
+        score: Math.min(
+          100,
+          Math.max(
+            0,
+            (night / maxCommits) * 50 +
+              (night > avgCommits * 2 ? 30 : 0) +
+              (night > evening ? 20 : 0)
+          )
+        ),
+      },
+      {
+        type: 'The Side Project Guy',
+        description:
+          'You code almost exclusively outside of traditional work hours, likely balancing a day job with passionate side projects and personal coding time.',
+        icon: '🚀',
+        color: 'text-emerald-600',
+        score: Math.min(
+          100,
+          Math.max(
+            0,
+            ((earlyTotal + evening + night) / totalCommits) * 100 -
+              (workHours / totalCommits) * 50
+          )
+        ),
+      },
+      {
+        type: 'The Adaptive Coder',
+        description:
+          'Your coding patterns show flexibility across different times of day, adapting to various schedules and project needs.',
+        icon: '🎯',
+        color: 'text-gray-600',
+        score: Math.min(
+          100,
+          Math.max(
+            0,
+            (1 - Math.abs(stdDev / avgCommits - 1)) * 50 +
+              (allBuckets.filter((bucket) => bucket > avgCommits * 0.5).length /
+                6) *
+                50
+          )
+        ),
+      },
+    ];
+
+    const bestProfile = profiles.reduce((best, current) =>
+      current.score > best.score ? current : best
+    );
+
+    return {
+      ...bestProfile,
+      score: Math.round(bestProfile.score),
+    };
+  }, [chartData, commits.length]);
+
   const userTimezone = Intl.DateTimeFormat().resolvedOptions().timeZone;
 
   if (!commits.length) {
@@ -203,6 +381,29 @@ export default function CommitTimeHistogram({
             </p>
           </div>
         </div>
+
+        {developerType && (
+          <div className="mt-6 rounded-lg border bg-gradient-to-r from-gray-50 to-gray-100 p-6 dark:from-gray-900 dark:to-gray-800">
+            <div className="flex items-center justify-center space-x-4">
+              <div className={`text-4xl ${developerType.color}`}>
+                {developerType.icon}
+              </div>
+              <div className="text-center">
+                <div className="flex items-center justify-center space-x-2">
+                  <h3 className={`text-xl font-bold ${developerType.color}`}>
+                    {developerType.type}
+                  </h3>
+                  <span className="rounded-full bg-gray-200 px-2 py-1 text-xs font-medium text-gray-700 dark:bg-gray-700 dark:text-gray-300">
+                    {developerType.score}/100
+                  </span>
+                </div>
+                <p className="mt-2 max-w-2xl text-sm text-gray-600 dark:text-gray-400">
+                  {developerType.description}
+                </p>
+              </div>
+            </div>
+          </div>
+        )}
 
         <div className="mt-4 text-center">
           <p className="text-muted-foreground text-xs">
