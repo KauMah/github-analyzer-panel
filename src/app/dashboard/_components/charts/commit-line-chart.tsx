@@ -1,7 +1,7 @@
 'use client';
 
 import { useMemo, useState } from 'react';
-import { Bar, BarChart, XAxis, YAxis, CartesianGrid } from 'recharts';
+import { Bar, BarChart, XAxis, YAxis, CartesianGrid, Cell } from 'recharts';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import {
   ChartContainer,
@@ -33,6 +33,8 @@ export function CommitLineChart({ commits = [] }: CommitLineChartProps) {
     const startDate = startOfDay(subDays(new Date(), 13));
     return { startDate, endDate };
   });
+
+  const [hoveredDate, setHoveredDate] = useState<string | null>(null);
 
   const filteredCommits = useMemo(() => {
     return commits.filter((commit) => {
@@ -116,6 +118,24 @@ export function CommitLineChart({ commits = [] }: CommitLineChartProps) {
       isSameDay(dateRange.startDate, expectedStart) &&
       isSameDay(dateRange.endDate, expectedEnd)
     );
+  };
+
+  const getBarOpacity = (date: string) => {
+    return hoveredDate === null || hoveredDate === date ? 1 : 0.3;
+  };
+
+  const getBarColor = (baseColor: string, date: string) => {
+    if (hoveredDate === date) {
+      // Make the color brighter when hovered
+      return baseColor === '#3b82f6'
+        ? '#1d4ed8'
+        : baseColor === '#10b981'
+          ? '#059669'
+          : baseColor === '#ef4444'
+            ? '#dc2626'
+            : baseColor;
+    }
+    return baseColor;
   };
 
   if (!commits.length) {
@@ -203,11 +223,17 @@ export function CommitLineChart({ commits = [] }: CommitLineChartProps) {
       </CardHeader>
       <CardContent>
         <div className="grid grid-cols-1 gap-6 lg:grid-cols-2">
-          {/* Commits Chart */}
-          <div>
+          <div onMouseLeave={() => setHoveredDate(null)}>
             <h3 className="mb-4 text-lg font-semibold">Commits & Activity</h3>
             <ChartContainer config={chartConfig} className="h-[300px]">
-              <BarChart data={chartData}>
+              <BarChart
+                data={chartData}
+                onMouseMove={(data) => {
+                  if (data && data.activeLabel) {
+                    setHoveredDate(data.activeLabel);
+                  }
+                }}
+              >
                 <CartesianGrid strokeDasharray="3 3" opacity={0.3} />
                 <XAxis
                   dataKey="date"
@@ -259,22 +285,32 @@ export function CommitLineChart({ commits = [] }: CommitLineChartProps) {
                   }}
                 />
                 <ChartLegend content={<ChartLegendContent />} />
-                <Bar
-                  dataKey="commits"
-                  fill={chartConfig.commits.color}
-                  radius={[4, 4, 0, 0]}
-                />
+                <Bar dataKey="commits" radius={[4, 4, 0, 0]}>
+                  {chartData.map((entry, index) => (
+                    <Cell
+                      key={`commits-cell-${index}`}
+                      fill={getBarColor(chartConfig.commits.color, entry.date)}
+                      opacity={getBarOpacity(entry.date)}
+                    />
+                  ))}
+                </Bar>
               </BarChart>
             </ChartContainer>
           </div>
 
-          {/* Lines Chart */}
-          <div>
+          <div onMouseLeave={() => setHoveredDate(null)}>
             <h3 className="mb-4 text-lg font-semibold">
               Lines Added vs Removed
             </h3>
             <ChartContainer config={linesChartConfig} className="h-[300px]">
-              <BarChart data={chartData}>
+              <BarChart
+                data={chartData}
+                onMouseMove={(data) => {
+                  if (data && data.activeLabel) {
+                    setHoveredDate(data.activeLabel);
+                  }
+                }}
+              >
                 <CartesianGrid strokeDasharray="3 3" opacity={0.3} />
                 <XAxis
                   dataKey="date"
@@ -326,16 +362,30 @@ export function CommitLineChart({ commits = [] }: CommitLineChartProps) {
                   }}
                 />
                 <ChartLegend content={<ChartLegendContent />} />
-                <Bar
-                  dataKey="linesAdded"
-                  fill={linesChartConfig.linesAdded.color}
-                  radius={[4, 4, 0, 0]}
-                />
-                <Bar
-                  dataKey="linesDeleted"
-                  fill={linesChartConfig.linesDeleted.color}
-                  radius={[4, 4, 0, 0]}
-                />
+                <Bar dataKey="linesAdded" radius={[4, 4, 0, 0]}>
+                  {chartData.map((entry, index) => (
+                    <Cell
+                      key={`added-cell-${index}`}
+                      fill={getBarColor(
+                        linesChartConfig.linesAdded.color,
+                        entry.date
+                      )}
+                      opacity={getBarOpacity(entry.date)}
+                    />
+                  ))}
+                </Bar>
+                <Bar dataKey="linesDeleted" radius={[4, 4, 0, 0]}>
+                  {chartData.map((entry, index) => (
+                    <Cell
+                      key={`deleted-cell-${index}`}
+                      fill={getBarColor(
+                        linesChartConfig.linesDeleted.color,
+                        entry.date
+                      )}
+                      opacity={getBarOpacity(entry.date)}
+                    />
+                  ))}
+                </Bar>
               </BarChart>
             </ChartContainer>
           </div>
