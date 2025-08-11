@@ -1,20 +1,22 @@
-import { prisma } from '@/lib/prisma';
-import { auth, currentUser } from '@clerk/nextjs/server';
+import { currentUser } from '@clerk/nextjs/server';
 import UpdateCommitButton from './_components/UpdateCommitButton';
+import CommitCharts from './_components/commit-charts';
+import { EmptyStateCard } from './_components/empty-state-card';
+import { Suspense } from 'react';
 
 export default async function Dashboard() {
-  const { userId } = await auth();
   const user = await currentUser();
 
-  const commits = await prisma.commit.findMany({
-    where: { username: user?.username ?? '' },
-  });
   return (
-    <div className="h-full">
-      <h1>Dashboard</h1>
-      <p>{`You're ${user?.username}, with the id ${userId}`}</p>
-      <p>{`You have ${commits.length} commits to your name`}</p>
-      <UpdateCommitButton />
+    <div className="h-full space-y-6 p-8">
+      <div className="flex items-center justify-between">
+        <h1 className="text-3xl font-bold">{user?.username ?? 'Dashboard'}</h1>
+        <UpdateCommitButton />
+      </div>
+
+      <Suspense fallback={<EmptyStateCard />}>
+        <CommitCharts />
+      </Suspense>
     </div>
   );
 }
