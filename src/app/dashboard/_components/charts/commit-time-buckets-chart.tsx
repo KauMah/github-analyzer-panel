@@ -75,7 +75,7 @@ export default function CommitTimeHistogram({
     );
   }, [chartData]);
 
-  const developerType = useMemo(() => {
+  const topDeveloperProfiles = useMemo(() => {
     if (commits.length === 0) return null;
 
     const totalCommits = commits.length;
@@ -134,7 +134,7 @@ export default function CommitTimeHistogram({
       {
         type: 'The Night Owl',
         description:
-          'You thrive in late-night coding sessions, preferring uninterrupted time for deep work. Common among indie developers and students.',
+          'You thrive in late-night coding sessions, preferring uninterrupted time for deep work. ',
         icon: '🦉',
         color: 'text-purple-600',
         score: Math.min(
@@ -241,16 +241,115 @@ export default function CommitTimeHistogram({
           )
         ),
       },
+      {
+        type: 'The Weekend Warrior',
+        description:
+          'You do most of your coding on weekends, suggesting a busy weekday schedule with dedicated weekend development time.',
+        icon: '🏖️',
+        color: 'text-cyan-600',
+        score: Math.min(
+          100,
+          Math.max(
+            0,
+            (evening / totalCommits) * 60 +
+              (night / totalCommits) * 40 +
+              (workHours < avgCommits * 0.7 ? 30 : 0)
+          )
+        ),
+      },
+      {
+        type: 'The Lunch Break Coder',
+        description:
+          'You squeeze in coding during lunch hours and short breaks, showing dedication to continuous learning and development.',
+        icon: '🥪',
+        color: 'text-amber-600',
+        score: Math.min(
+          100,
+          Math.max(
+            0,
+            (afternoon / totalCommits) * 80 +
+              (afternoon > morning ? 20 : 0) +
+              (afternoon > evening ? 20 : 0)
+          )
+        ),
+      },
+      {
+        type: 'The Remote Worker',
+        description:
+          'Your coding is spread across flexible hours with peaks in morning and afternoon, typical of remote work arrangements.',
+        icon: '🏠',
+        color: 'text-teal-600',
+        score: Math.min(
+          100,
+          Math.max(
+            0,
+            (morning / totalCommits) * 40 +
+              (afternoon / totalCommits) * 40 +
+              (evening / totalCommits) * 20 +
+              (Math.abs(morning - afternoon) < avgCommits * 0.3 ? 30 : 0)
+          )
+        ),
+      },
+      {
+        type: 'The Freelancer',
+        description:
+          'Your coding shows irregular patterns with bursts of activity at various times, typical of project-based freelance work.',
+        icon: '💻',
+        color: 'text-pink-600',
+        score: Math.min(
+          100,
+          Math.max(
+            0,
+            (stdDev / avgCommits) * 40 +
+              (maxCommits > avgCommits * 2 ? 30 : 0) +
+              (allBuckets.filter((bucket) => bucket > 0).length >= 4 ? 30 : 0)
+          )
+        ),
+      },
+      {
+        type: 'The Startup Founder',
+        description:
+          'You code at all hours with high variability, showing the "always on" mentality typical of early-stage startup founders.',
+        icon: '🚀',
+        color: 'text-rose-600',
+        score: Math.min(
+          100,
+          Math.max(
+            0,
+            (allBuckets.filter((bucket) => bucket > 0).length / 6) * 50 +
+              (maxCommits > avgCommits * 1.5 ? 30 : 0) +
+              (night > avgCommits * 0.5 ? 20 : 0)
+          )
+        ),
+      },
+      {
+        type: 'The Consultant',
+        description:
+          'Your coding peaks during business hours with occasional evening work, typical of client-focused consulting work.',
+        icon: '📊',
+        color: 'text-slate-600',
+        score: Math.min(
+          100,
+          Math.max(
+            0,
+            (workHours / totalCommits) * 70 +
+              (evening / totalCommits) * 30 +
+              (morning > night ? 20 : 0)
+          )
+        ),
+      },
     ];
 
-    const bestProfile = profiles.reduce((best, current) =>
-      current.score > best.score ? current : best
-    );
+    const topProfiles = profiles
+      .sort((a, b) => b.score - a.score)
+      .slice(0, 2)
+      .map((profile) => ({
+        ...profile,
+        score: Math.round(profile.score),
+      }));
+    console.log(profiles);
 
-    return {
-      ...bestProfile,
-      score: Math.round(bestProfile.score),
-    };
+    return topProfiles;
   }, [chartData, commits.length]);
 
   const userTimezone = Intl.DateTimeFormat().resolvedOptions().timeZone;
@@ -274,7 +373,7 @@ export default function CommitTimeHistogram({
   return (
     <Card>
       <CardHeader>
-        <CardTitle>When Do You Code?</CardTitle>
+        <CardTitle>Time of Day Patterns</CardTitle>
         <p className="text-muted-foreground text-sm">
           Commit distribution throughout the day ({userTimezone})
         </p>
@@ -382,25 +481,48 @@ export default function CommitTimeHistogram({
           </div>
         </div>
 
-        {developerType && (
-          <div className="mt-6 rounded-lg border bg-gradient-to-r from-gray-50 to-gray-100 p-6 dark:from-gray-900 dark:to-gray-800">
-            <div className="flex items-center justify-center space-x-4">
-              <div className={`text-4xl ${developerType.color}`}>
-                {developerType.icon}
-              </div>
-              <div className="text-center">
-                <div className="flex items-center justify-center space-x-2">
-                  <h3 className={`text-xl font-bold ${developerType.color}`}>
-                    {developerType.type}
-                  </h3>
-                  <span className="rounded-full bg-gray-200 px-2 py-1 text-xs font-medium text-gray-700 dark:bg-gray-700 dark:text-gray-300">
-                    {developerType.score}/100
-                  </span>
+        {topDeveloperProfiles && (
+          <div className="mt-6">
+            <h3 className="mb-4 text-center text-lg font-semibold">
+              Your Top Developer Profiles
+            </h3>
+            <div className="grid grid-cols-1 gap-4 md:grid-cols-2">
+              {topDeveloperProfiles.map((profile, index) => (
+                <div
+                  key={profile.type}
+                  className={`rounded-lg border bg-gradient-to-r from-gray-50 to-gray-100 p-4 dark:from-gray-900 dark:to-gray-800 ${
+                    index === 0
+                      ? 'ring-2 ring-purple-200 dark:ring-purple-800'
+                      : ''
+                  }`}
+                >
+                  <div className="flex items-center space-x-4">
+                    <div className="flex items-center space-x-2">
+                      <div className={`text-2xl ${profile.color}`}>
+                        {profile.icon}
+                      </div>
+                      {index === 0 && (
+                        <span className="rounded-full bg-purple-100 px-2 py-1 text-xs font-medium text-purple-600 dark:bg-purple-900 dark:text-purple-400">
+                          #1 Match
+                        </span>
+                      )}
+                    </div>
+                    <div className="flex-1">
+                      <div className="flex items-center justify-between">
+                        <h4 className={`text-lg font-bold ${profile.color}`}>
+                          {profile.type}
+                        </h4>
+                        <span className="rounded-full bg-gray-200 px-2 py-1 text-xs font-medium text-gray-700 dark:bg-gray-700 dark:text-gray-300">
+                          {profile.score}/100
+                        </span>
+                      </div>
+                      <p className="mt-1 text-sm text-gray-600 dark:text-gray-400">
+                        {profile.description}
+                      </p>
+                    </div>
+                  </div>
                 </div>
-                <p className="mt-2 max-w-2xl text-sm text-gray-600 dark:text-gray-400">
-                  {developerType.description}
-                </p>
-              </div>
+              ))}
             </div>
           </div>
         )}

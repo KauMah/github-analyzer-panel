@@ -208,7 +208,10 @@ export function CommitLineChart({ commits = [] }: CommitLineChartProps) {
         <div className="grid grid-cols-1 gap-6 lg:grid-cols-2">
           <div onMouseLeave={() => setHoveredDate(null)}>
             <h3 className="mb-4 text-lg font-semibold">Commits & Activity</h3>
-            <ChartContainer config={chartConfig} className="h-[300px]">
+            <ChartContainer
+              config={chartConfig}
+              className="h-[300px] w-full max-w-2xl"
+            >
               <BarChart
                 data={chartData}
                 onMouseMove={(data) => {
@@ -311,7 +314,10 @@ export function CommitLineChart({ commits = [] }: CommitLineChartProps) {
             <h3 className="mb-4 text-lg font-semibold">
               Lines Added vs Removed
             </h3>
-            <ChartContainer config={linesChartConfig} className="h-[300px]">
+            <ChartContainer
+              config={linesChartConfig}
+              className="h-[300px] w-full max-w-2xl"
+            >
               <BarChart
                 data={chartData}
                 onMouseMove={(data) => {

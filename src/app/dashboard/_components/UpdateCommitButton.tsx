@@ -14,10 +14,7 @@ export default function UpdateCommitButton() {
       onClick={() =>
         startTransition(async () => {
           try {
-            const res = await updateCommits();
-            console.log(res);
-            const data = unwrap(res);
-            console.log(data);
+            const data = unwrap(await updateCommits());
             toast.success(`Loaded ${data.toString()} commits`);
           } catch (err) {
             toast.error(
